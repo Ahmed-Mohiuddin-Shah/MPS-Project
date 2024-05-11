@@ -4,9 +4,15 @@
 #include <avr/io.h>
 #include <string.h>
 #include <util/delay.h>
+#include <Wire.h>
 
 #define E PC5
 #define RS PC4
+
+#define F_CPU 1000000UL
+
+#define BAUD 4800
+#define BAUDRATE (F_CPU / 16 * BAUD) - 1
 
 // Define keypad layout
 char keys[4][3] = {{'1', '2', '3'},
@@ -23,6 +29,47 @@ void epulse(void);
 void delay_ms(unsigned int de);
 char getKeyPad(void);
 
+void uart_init(void);
+void uart_transmit(unsigned char data);
+unsigned char uart_recieve(void);
+void usart_msg(char *c);
+
+//=================================================================
+//        UART Functions
+//=================================================================
+void uart_init(void)
+{
+  UBRRH = 0x00;                                                    // shift the register right by 8 bits
+  UBRRL = BAUDRATE;                                                // set baud rate
+  UCSRB |= (1 << TXEN) | (1 << RXEN);                              // enable receiver and transmitter
+  UCSRC |= (1 << USBS) | (3 << UCSZ0) | (1 << UPM1) | (0 << UPM0); // 8bit data format,Asynchronous,Even parity
+}
+
+// function to send data
+void uart_transmit(unsigned char data)
+{
+
+  while (!(UCSRA & (1 << UDRE))) // wait while register is free
+  {
+  }
+  UDR = data; // load data in the register
+}
+
+// function to receive data
+unsigned char uart_recieve()
+{
+  while (!(UCSRA & (1 << RXC))) // wait while data is being received
+  {
+  }
+  return (UDR); // return 8-bit data
+}
+
+void usart_msg(char *c)
+{
+  while (*c != 0)
+    uart_transmit(*c++);
+}
+
 //=================================================================
 //        Main Function
 //=================================================================
@@ -35,6 +82,8 @@ int main(void)
   // Set lower half of PORTB (PB0-PB3) as input and upper half (PB4-PB7) as output
   DDRB = 0xF0;
   PORTB = 0x0F; // Enable pull-up resistors for lower half
+
+  uart_init();
 
   delay_ms(500); // Initiaize LCD
   dispinit();
@@ -56,14 +105,15 @@ int main(void)
       {
         display("  Good Bye....", 1);
         display("               ", 2);
-        delay_ms(2000);
+        delay_ms(1000);
         break;
       }
       else
       {
         display("Key Pressed:", 1);
         display(&key, 2);
-        delay_ms(1000);
+        uart_transmit(key);
+        delay_ms(500);
       }
     }
   }
@@ -93,9 +143,9 @@ void dispinit(void)
 void epulse(void)
 {
   PORTC |= 1 << E;
-  delay_ms(100); // Adjust delay if required
+  delay_ms(5); // Adjust delay if required
   PORTC &= ~(1 << E);
-  delay_ms(100); // Adjust delay if required
+  delay_ms(5); // Adjust delay if required
 }
 
 //=================================================================
