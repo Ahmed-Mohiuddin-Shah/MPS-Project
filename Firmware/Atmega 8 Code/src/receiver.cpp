@@ -1,7 +1,6 @@
 #include <avr/io.h>
 #include <string.h>
 #include <util/delay.h>
-#include <Wire.h>
 
 #define E PC5
 #define RS PC4

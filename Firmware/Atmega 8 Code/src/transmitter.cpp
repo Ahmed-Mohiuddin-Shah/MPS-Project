@@ -1,7 +1,6 @@
 #include <avr/io.h>
 #include <string.h>
 #include <util/delay.h>
-#include <Wire.h>
 
 #define E PC5
 #define RS PC4
@@ -16,6 +15,8 @@ char keys[4][3] = {{'1', '2', '3'},
                    {'4', '5', '6'},
                    {'7', '8', '9'},
                    {'*', '0', '#'}};
+
+int delay_for_menu = 4000;
 
 // Function Prototypes
 char keypad_scan(void);
@@ -214,36 +215,37 @@ void processOrder(char key)
 //=================================================================
 void displayMenu(void)
 {
+
   delay_ms(200);
   display("Welcome to", 1);
   display("Cato Restaurant", 2);
-  delay_ms(2000);
+  delay_ms(delay_for_menu);
 
   clearDisplay();
 
   display("Press Key to", 1);
   display("Select Order", 2);
-  delay_ms(2000);
+  delay_ms(delay_for_menu);
 
   clearDisplay();
 
   display("# to Confirm", 1);
   display("* to Cancel", 2);
-  delay_ms(2000);
+  delay_ms(delay_for_menu);
 
   clearDisplay();
 
   display("1.Tea  Rs.10   ", 1);
   display("2.Coffee  Rs.15", 2);
-  delay_ms(2000);
+  delay_ms(delay_for_menu);
 
   display("3.Vadapav  Rs.20", 1);
   display("4.Idli  Rs.25   ", 2);
-  delay_ms(2000);
+  delay_ms(delay_for_menu);
 
   display("5.Dosa  Rs.25   ", 1);
   display("6.Lunch  Rs.60  ", 2);
-  delay_ms(2000);
+  delay_ms(delay_for_menu);
 
   clearDisplay();
   display("Place Order     ", 1);
