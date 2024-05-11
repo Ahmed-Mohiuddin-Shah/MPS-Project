@@ -1,6 +1,3 @@
-//=================================================================
-/* LCD Pin-5(R/W) must be connected to ground*/
-//=================================================================
 #include <avr/io.h>
 #include <string.h>
 #include <util/delay.h>
@@ -11,7 +8,7 @@
 
 #define F_CPU 1000000UL
 
-#define BAUD 4800
+#define BAUD 9600
 #define BAUDRATE (F_CPU / 16 * BAUD) - 1
 
 // Define keypad layout
@@ -25,6 +22,12 @@ char keypad_scan(void);
 void display(char string[16], char LineNo);
 void displaybyte(char D);
 void dispinit(void);
+
+void displayMenu(void);
+
+void processOrder(char key);
+
+void clearDisplay(void);
 void epulse(void);
 void delay_ms(unsigned int de);
 char getKeyPad(void);
@@ -35,8 +38,40 @@ unsigned char uart_recieve(void);
 void usart_msg(char *c);
 
 //=================================================================
+//        Main Function
+//=================================================================
+int main(void)
+{
+  // Initialize UART
+  uart_init();
+
+  DDRC = 0x03F; // Set LCD Port Direction
+
+  char key;
+
+  // Set lower half of PORTB (PB0-PB3) as input and upper half (PB4-PB7) as output
+  DDRB = 0xF0;
+  PORTB = 0x0F; // Enable pull-up resistors for lower half
+
+  delay_ms(500); // Initiaize LCD
+  dispinit();
+
+  displayMenu();
+
+  while (1)
+  {
+    key = keypad_scan();
+    processOrder(key);
+  }
+
+  return 0;
+}
+
+//=================================================================
 //        UART Functions
 //=================================================================
+
+// function to initialize UART
 void uart_init(void)
 {
   UBRRH = 0x00;                                                    // shift the register right by 8 bits
@@ -68,57 +103,6 @@ void usart_msg(char *c)
 {
   while (*c != 0)
     uart_transmit(*c++);
-}
-
-//=================================================================
-//        Main Function
-//=================================================================
-int main(void)
-{
-  DDRC = 0x03F; // Set LCD Port Direction
-
-  char key;
-
-  // Set lower half of PORTB (PB0-PB3) as input and upper half (PB4-PB7) as output
-  DDRB = 0xF0;
-  PORTB = 0x0F; // Enable pull-up resistors for lower half
-
-  uart_init();
-
-  delay_ms(500); // Initiaize LCD
-  dispinit();
-  delay_ms(200);
-  display(" Hi There....", 1);
-  display("Catto UwU", 2);
-  delay_ms(2000);
-
-  while (1)
-  {
-    key = keypad_scan(); // Scan the keypad
-
-    if (key != 0)
-    {
-      display("               ", 1);
-      display("               ", 2);
-
-      if (key == '#')
-      {
-        display("  Good Bye....", 1);
-        display("               ", 2);
-        delay_ms(1000);
-        break;
-      }
-      else
-      {
-        display("Key Pressed:", 1);
-        display(&key, 2);
-        uart_transmit(key);
-        delay_ms(500);
-      }
-    }
-  }
-
-  return 0;
 }
 
 //=================================================================
@@ -168,6 +152,102 @@ void displaybyte(char D)
   PORTC &= 0xF0;
   PORTC |= K1;
   epulse();
+}
+
+//=================================================================
+//        Clear Display Function
+//=================================================================
+void clearDisplay(void)
+{
+  PORTC &= ~(1 << RS); // RS=0 Command Mode
+  displaybyte(0x01);   // Clear Display
+  delay_ms(5);
+}
+
+//=================================================================
+//        Process Order Function
+//=================================================================
+void processOrder(char key)
+{
+  char order[16];
+  switch (key)
+  {
+  case '1':
+    strcpy(order, "Tea  Rs.10");
+    break;
+  case '2':
+    strcpy(order, "Coffee  Rs.15");
+    break;
+  case '3':
+    strcpy(order, "Vadapav  Rs.20");
+    break;
+  case '4':
+    strcpy(order, "Idli  Rs.25");
+    break;
+  case '5':
+    strcpy(order, "Dosa  Rs.25");
+    break;
+  case '6':
+    strcpy(order, "Lunch  Rs.60");
+    break;
+  case '#':
+    strcpy(order, "Order Confirmed");
+    break;
+  case '*':
+    strcpy(order, "Order Cancelled");
+    break;
+  default:
+    return;
+    break;
+  }
+
+  clearDisplay();
+  display(order, 1);
+  uart_transmit(key);
+  delay_ms(2000);
+  clearDisplay();
+  displayMenu();
+}
+
+//=================================================================
+//        Display Menu Function
+//=================================================================
+void displayMenu(void)
+{
+  delay_ms(200);
+  display("Welcome to", 1);
+  display("Cato Restaurant", 2);
+  delay_ms(2000);
+
+  clearDisplay();
+
+  display("Press Key to", 1);
+  display("Select Order", 2);
+  delay_ms(2000);
+
+  clearDisplay();
+
+  display("# to Confirm", 1);
+  display("* to Cancel", 2);
+  delay_ms(2000);
+
+  clearDisplay();
+
+  display("1.Tea  Rs.10   ", 1);
+  display("2.Coffee  Rs.15", 2);
+  delay_ms(2000);
+
+  display("3.Vadapav  Rs.20", 1);
+  display("4.Idli  Rs.25   ", 2);
+  delay_ms(2000);
+
+  display("5.Dosa  Rs.25   ", 1);
+  display("6.Lunch  Rs.60  ", 2);
+  delay_ms(2000);
+
+  clearDisplay();
+  display("Place Order     ", 1);
+  delay_ms(200);
 }
 
 //=================================================================
@@ -223,7 +303,6 @@ pins 1, 2, 3 are connected to PORTB 4,5,6
 
 */
 
-// Function Definitions
 char keypad_scan(void)
 {
   for (uint8_t c = 0; c < 3; c++)
