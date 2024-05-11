@@ -17,7 +17,7 @@ This project implements a keypad-based restaurant management system using an Atm
 
 ## Software
 
-The system is written in C and compiled using an AVR compiler. The code includes functionalities for:
+The system is written in C and compiled using an AVR compiler Using PlatformIO. The code includes functionalities for:
 
 - Initialization of keypad, LCD display, and UART module
 - Scanning keypad for customer input
