@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes'?>
 <WORKSPACE>
  <FRAME activewindow="0">
-  <PLACEMENT>2c0000000200000003000000ffffffffffffffffffffffffffffffff260100000100000050070000f7030000</PLACEMENT>
+  <PLACEMENT>2c0000000000000001000000fffffffffffffffffffffffffffffffff8ffffff0300000022060000f9030000</PLACEMENT>
   <WINDOW type="default" module="ISIS"/>
  </FRAME>
  <MODULE name="VSMDEBUG">
   <PWI>
    <POPUP w="800" x="38" flags="00000002" y="129" h="200" pid="0" iid="-1">
     <PROPERTIES>
-     <ITEM name="Message Column Width">663</ITEM>
+     <ITEM name="Message Column Width">542</ITEM>
      <ITEM name="ShowGrid">No</ITEM>
      <ITEM name="Source Column Width">100</ITEM>
      <ITEM name="Time Column Width">120</ITEM>
@@ -174,7 +174,7 @@
      <ITEM name="TopLineAddress">00000000</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="16" x="118" flags="80000000" y="209" h="32" pid="14" iid="6">
+   <POPUP w="16" x="118" flags="00000000" y="209" h="32" pid="14" iid="6">
     <PROPERTIES>
      <ITEM name="DataType">2</ITEM>
      <ITEM name="DispChars">Yes</ITEM>
@@ -204,13 +204,25 @@
      <ITEM name="TopLineAddress">00000020</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="450" x="178" flags="00008023" y="269" h="250" pid="0" iid="12">
+   <POPUP w="450" x="178" flags="00000023" y="269" h="250" pid="0" iid="12">
     <PROPERTIES>
      <ITEM name="AutoEcho">1</ITEM>
      <ITEM name="HexMode">0</ITEM>
     </PROPERTIES>
    </POPUP>
    <POPUP w="450" x="1367" flags="00000023" y="267" h="250" pid="0" iid="13">
+    <PROPERTIES>
+     <ITEM name="AutoEcho">1</ITEM>
+     <ITEM name="HexMode">0</ITEM>
+    </PROPERTIES>
+   </POPUP>
+   <POPUP w="450" x="1443" flags="00000023" y="701" h="250" pid="0" iid="5">
+    <PROPERTIES>
+     <ITEM name="AutoEcho">1</ITEM>
+     <ITEM name="HexMode">0</ITEM>
+    </PROPERTIES>
+   </POPUP>
+   <POPUP w="450" x="983" flags="00000023" y="705" h="248" pid="0" iid="9">
     <PROPERTIES>
      <ITEM name="AutoEcho">1</ITEM>
      <ITEM name="HexMode">0</ITEM>
