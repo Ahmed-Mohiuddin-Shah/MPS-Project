@@ -31,6 +31,7 @@ void processOrder(char key);
 void clearDisplay(void);
 void epulse(void);
 void delay_ms(unsigned int de);
+void timer_delay_ms(unsigned int de);
 char getKeyPad(void);
 
 void uart_init(void);
@@ -48,6 +49,9 @@ int main(void)
 
   DDRC = 0x03F; // Set LCD Port Direction
 
+  TCNT0 = 0x00;
+  TCCR0 = (1 << CS00) | (1 << CS02);
+
   char key;
 
   // Set lower half of PORTB (PB0-PB3) as input and upper half (PB4-PB7) as output
@@ -57,12 +61,13 @@ int main(void)
   delay_ms(500); // Initiaize LCD
   dispinit();
 
-  displayMenu();
+  // displayMenu();
 
+  int i = 0;
   while (1)
   {
-    key = keypad_scan();
-    processOrder(key);
+    i++;
+    timer_delay_ms(2000);
   }
 
   return 0;
@@ -205,9 +210,6 @@ void processOrder(char key)
   clearDisplay();
   display(order, 1);
   uart_transmit(key);
-  delay_ms(2000);
-  clearDisplay();
-  displayMenu();
 }
 
 //=================================================================
@@ -286,10 +288,34 @@ void delay_ms(unsigned int de)
   unsigned int rr, rr1;
   for (rr = 0; rr < de; rr++)
   {
-
+    processOrder(keypad_scan());
     for (rr1 = 0; rr1 < 30; rr1++) // 395
     {
       asm("nop");
+    }
+  }
+}
+
+//=================================================================
+//        Timer Delay Function
+//=================================================================
+
+uint8_t timerOverflowCount = 0;
+
+void timer_delay_ms(unsigned int de)
+{
+  while (1)
+  {
+    while ((TIFR & 0x01) == 0)
+      ;
+    TCNT0 = 0x00;
+    TIFR = 0x01; // clear timer1 overflow flag
+    timerOverflowCount++;
+    processOrder(keypad_scan());
+    if (timerOverflowCount >= 1)
+    {
+      timerOverflowCount = 0;
+      break;
     }
   }
 }
@@ -318,6 +344,7 @@ char keypad_scan(void)
         while (!(PINB & (1 << r)))
           ;            // Wait for key release
         _delay_ms(50); // Debounce delay
+
         return keys[r][c];
       }
     }
