@@ -11,7 +11,7 @@
 #define BAUD 9600
 #define BAUDRATE (F_CPU / 16 * BAUD) - 1
 
-#define DELAY_FOR_MENU 200
+#define DELAY_FOR_MENU 1000
 
 // Define keypad layout
 char keys[4][3] = {{'1', '2', '3'},
@@ -83,8 +83,10 @@ void usart_msg(char *c)
 }
 
 //=================================================================
-//        LCD Display Initialization Function
+//        LCD Functions
 //=================================================================
+
+// LCD Display Initialization Function
 void dispinit(void)
 {
     int count;
@@ -98,9 +100,7 @@ void dispinit(void)
     PORTC |= 1 << RS; // RS=1
 }
 
-//=================================================================
-//        Enable Pulse Function
-//=================================================================
+// Enable Pulse Function
 void epulse(void)
 {
     PORTC |= 1 << E;
@@ -109,9 +109,7 @@ void epulse(void)
     delay_ms(5); // Adjust delay if required
 }
 
-//=================================================================
-//        Send Single Byte to LCD Display Function
-//=================================================================
+// Send Single Byte to LCD Display Function
 void displaybyte(char D)
 {
     // data is in Temp Register
@@ -131,9 +129,7 @@ void displaybyte(char D)
     epulse();
 }
 
-//=================================================================
-//        Clear Display Function
-//=================================================================
+// Clear Display Function
 void clearDisplay(void)
 {
     PORTC &= ~(1 << RS); // RS=0 Command Mode
@@ -141,9 +137,7 @@ void clearDisplay(void)
     delay_ms(5);
 }
 
-//=================================================================
-//        Process Order Function
-//=================================================================
+// Process Order Function
 void processOrder(char key)
 {
     char order[16];
@@ -183,51 +177,41 @@ void processOrder(char key)
     uart_transmit(key);
 }
 
-//=================================================================
-//        Display Menu Function
-//=================================================================
+// Display Menu Function
 void displayMenu(void)
 {
 
-    delay_ms(200);
-    display("Welcome to", 1);
-    display("Cato Restaurant", 2);
-    timer_delay_ms(DELAY_FOR_MENU);
+    static int count = 0;
 
-    clearDisplay();
-
-    display("Press Key to", 1);
-    display("Select Order", 2);
-    timer_delay_ms(DELAY_FOR_MENU);
-
-    clearDisplay();
-
-    display("# to Confirm", 1);
-    display("* to Cancel", 2);
-    timer_delay_ms(DELAY_FOR_MENU);
-
-    clearDisplay();
-
-    display("1.Tea  Rs.10   ", 1);
-    display("2.Coffee  Rs.15", 2);
-    timer_delay_ms(DELAY_FOR_MENU);
-
-    display("3.Vadapav  Rs.20", 1);
-    display("4.Idli  Rs.25   ", 2);
-    timer_delay_ms(DELAY_FOR_MENU);
-
-    display("5.Dosa  Rs.25   ", 1);
-    display("6.Lunch  Rs.60  ", 2);
-    timer_delay_ms(DELAY_FOR_MENU);
-
-    clearDisplay();
-    display("Place Order     ", 1);
-    delay_ms(200);
+    switch (count++)
+    {
+    case 0:
+        display("1.Tea  Rs.10   ", 1);
+        display("2.Coffee  Rs.15", 2);
+        break;
+    case 1:
+        display("3.Vadapav  Rs.20", 1);
+        display("4.Idli  Rs.25   ", 2);
+        break;
+    case 2:
+        display("5.Dosa  Rs.25   ", 1);
+        display("6.Lunch  Rs.60  ", 2);
+        break;
+    case 3:
+        display("# to Confirm    ", 1);
+        display("* to Cancel     ", 2);
+        break;
+    case 4:
+        display("Place Order     ", 1);
+        display("UwU             ", 2);
+        break;
+    default:
+        count = 0;
+        break;
+    }
 }
 
-//=================================================================
-//        Display Line on LCD at desired location Function
-//=================================================================
+// Display Line on LCD at desired location Function
 void display(char string[16], int LineNo)
 {
     int len, count;
@@ -276,7 +260,7 @@ void timer_delay_ms(unsigned int de)
 {
 
     de = de / 1000;
-    de = de * 261;
+    de = de * 26;
 
     while (1)
     {

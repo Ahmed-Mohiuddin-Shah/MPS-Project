@@ -27,8 +27,6 @@ int main(void)
   DDRD = 0;                                // all PD pins configured as input
   PORTD = (1 << PD2);                      // enable pull-up on the INT0 pin
 
-  char key;
-
   // Set lower half of PORTB (PB0-PB3) as input and upper half (PB4-PB7) as output
   DDRB = 0xF0;
   PORTB = 0x0F; // Enable pull-up resistors for lower half
@@ -36,9 +34,6 @@ int main(void)
   delay_ms(500); // Initiaize LCD
   dispinit();
 
-  // displayMenu();
-
-  int i = 0;
   while (1)
   {
 
@@ -50,7 +45,7 @@ int main(void)
     else
     {
       displayMenu();
-      timer_delay_ms(100);
+      timer_delay_ms(1000);
     }
   }
 
