@@ -40,7 +40,7 @@ int main(void)
   display("Welcome to", 1);
   display("Canteen", 2);
   delay_ms(8000);
-  
+
   while (1)
   {
 
