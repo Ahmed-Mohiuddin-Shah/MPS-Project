@@ -1,4 +1,5 @@
 #include "functions.h"
+#include <stdio.h>
 
 uint8_t swap = 0;
 // interrupt handler for INT0
@@ -17,8 +18,8 @@ int main(void)
 
   DDRC = 0x03F; // Set LCD Port Direction
 
-  TCNT0 = 0x00;
-  TCCR0 = (1 << CS00) | (1 << CS02);
+  TCNT0 = 0x00;                      // initialize counter
+  TCCR0 = (1 << CS00) | (1 << CS02); // start timer with 1024 prescaler
 
   // interrupt setup
   GICR |= (1 << INT0);                     // enable INT0;
@@ -34,18 +35,29 @@ int main(void)
   delay_ms(500); // Initiaize LCD
   dispinit();
 
+  delay_ms(500);
+
+  display("Welcome to", 1);
+  display("Canteen", 2);
+  delay_ms(8000);
+  
   while (1)
   {
 
     if (swap)
     {
-      display("Total Order", 1);
-      delay_ms(200);
+      uart_transmit('!');
+      clearDisplay();
+      display("Order Total     ", 1);
+      char total[16];
+      sprintf(total, "Rs.%d", order_total);
+      display(total, 2);
+      delay_ms(6000);
     }
     else
     {
       displayMenu();
-      timer_delay_ms(1000);
+      timer_delay_ms(2000);
     }
   }
 

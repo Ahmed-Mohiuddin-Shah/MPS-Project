@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <stdio.h>
 #include <string.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -19,6 +20,8 @@ char keys[4][3] = {{'1', '2', '3'},
                    {'7', '8', '9'},
                    {'*', '0', '#'}};
 
+int order_total = 0;
+
 // Function Prototypes
 
 // LCD Functions
@@ -30,9 +33,11 @@ void clearDisplay(void);
 void displayMenu(void);
 
 // Keypad Functions
-void processOrder(char key);
 char keypad_scan(void);
 char getKeyPad(void);
+
+// Order Functions
+void processOrder(char key);
 
 // Delay Functions
 void delay_ms(unsigned int de);
@@ -144,28 +149,69 @@ void processOrder(char key)
     switch (key)
     {
     case '1':
-        strcpy(order, "Tea  Rs.10");
+        strcpy(order, "Tea      Rs.100");
+        order_total += 100;
         break;
     case '2':
-        strcpy(order, "Coffee  Rs.15");
+        strcpy(order, "Coffee   Rs.150");
+        order_total += 150;
         break;
     case '3':
-        strcpy(order, "Vadapav  Rs.20");
+        strcpy(order, "Biscuits  Rs.40");
+        order_total += 40;
         break;
     case '4':
-        strcpy(order, "Idli  Rs.25");
+        strcpy(order, "Cookies  Rs.250");
+        order_total += 250;
         break;
     case '5':
-        strcpy(order, "Dosa  Rs.25");
+        strcpy(order, "Roti      Rs.30");
+        order_total += 30;
         break;
     case '6':
-        strcpy(order, "Lunch  Rs.60");
+        strcpy(order, "Lunch    Rs.200");
+        order_total += 200;
+        break;
+    case '7':
+        strcpy(order, "Dinner   Rs.250");
+        order_total += 250;
+        break;
+    case '8':
+        strcpy(order, "BreakfastRs.150");
+        order_total += 150;
+        break;
+    case '9':
+        strcpy(order, "Snacks   Rs.100");
+        order_total += 100;
+        break;
+    case '0':
+        strcpy(order, "Water    Rs.20");
+        order_total += 20;
+        break;
+    case '!':
+        sprintf(order, "%16d", order_total);
+        usart_msg(order);
+        display("Order Total     ", 1);
+        sprintf(order, "Rs.%d", order_total);
+        display(order, 2);
+        return;
         break;
     case '#':
+        uart_transmit(key);
+        clearDisplay();
         strcpy(order, "Order Confirmed");
+        display(order, 1);
+        sprintf(order, "Rs.%d", order_total);
+        display(order, 2);
+        order_total = 0;
+        delay_ms(10000);
+        clearDisplay();
+        display("Order System    ", 1);
+        return;
         break;
     case '*':
         strcpy(order, "Order Cancelled");
+        order_total = 0;
         break;
     default:
         return;
@@ -186,22 +232,30 @@ void displayMenu(void)
     switch (count++)
     {
     case 0:
-        display("1.Tea  Rs.10   ", 1);
-        display("2.Coffee  Rs.15", 2);
+        display("1.Tea     Rs.100", 1);
+        display("2.Coffee  Rs.150", 2);
         break;
     case 1:
-        display("3.Vadapav  Rs.20", 1);
-        display("4.Idli  Rs.25   ", 2);
+        display("3.Biscuits Rs.40", 1);
+        display("4.Cookies Rs.250", 2);
         break;
     case 2:
-        display("5.Dosa  Rs.25   ", 1);
-        display("6.Lunch  Rs.60  ", 2);
+        display("5.Roti     Rs.30", 1);
+        display("6.Lunch   Rs.200", 2);
         break;
     case 3:
+        display("7.Dinner  Rs.250", 1);
+        display("8.BreakfastRs.90", 2);
+        break;
+    case 4:
+        display("9.Snacks  Rs.100", 1);
+        display("0.Water    Rs.20", 2);
+        break;
+    case 5:
         display("# to Confirm    ", 1);
         display("* to Cancel     ", 2);
         break;
-    case 4:
+    case 6:
         display("Place Order     ", 1);
         display("UwU             ", 2);
         break;
@@ -259,8 +313,8 @@ uint8_t timerOverflowCount = 0;
 void timer_delay_ms(unsigned int de)
 {
 
-    de = de / 1000;
-    de = de * 26;
+    de = ceil((float)de / 100.0);
+    de = ceil((float)de * 0.2611);
 
     while (1)
     {
@@ -288,7 +342,7 @@ pins a, b, c, d are connected to PORTB 0,1,2,3
 pins 1, 2, 3 are connected to PORTB 4,5,6
 */
 
-// Function to scan the keypad 
+// Function to scan the keypad
 // Returns the key pressed
 char keypad_scan(void)
 {
@@ -310,3 +364,16 @@ char keypad_scan(void)
     }
     return 0; // No key pressed
 }
+
+// =================================================================
+//        Misc Code
+// =================================================================
+
+// char total_from_receiver[17];
+// for (int i = 0; i < 15; i++)
+// {
+//   total_from_receiver[i] = uart_recieve();
+//   displaybyte(total_from_receiver[i]);
+// }
+// display("Total Order     ", 1);
+// display(total_from_receiver, 2);
