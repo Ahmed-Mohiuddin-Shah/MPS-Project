@@ -18,8 +18,7 @@ int main(void)
 
   DDRC = 0x03F; // Set LCD Port Direction
 
-  TCNT0 = 0x00;                      // initialize counter
-  TCCR0 = (1 << CS00) | (1 << CS02); // start timer with 1024 prescaler
+  timer_init(); // Initialize timer
 
   // interrupt setup
   GICR |= (1 << INT0);                     // enable INT0;

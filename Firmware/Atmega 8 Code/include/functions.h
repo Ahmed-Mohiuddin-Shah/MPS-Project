@@ -305,16 +305,23 @@ void delay_ms(unsigned int de)
 }
 
 //=================================================================
-//        Timer0 Delay Function
+//        Timer0 Function
 //=================================================================
+
+void timer_init()
+{
+    TCNT0 = 0x00; // initialize counter
+    // start timer with 64 prescaler CS01	CS00
+    TCCR0 = (1 << CS01) | (1 << CS00); // Normal mode
+}
 
 uint8_t timerOverflowCount = 0;
 
 void timer_delay_ms(unsigned int de)
 {
 
-    de = ceil((float)de / 100.0);
-    de = ceil((float)de * 0.2611);
+    de = ceil((float)de);
+    de = ceil((float)de * 0.01632);
 
     while (1)
     {
