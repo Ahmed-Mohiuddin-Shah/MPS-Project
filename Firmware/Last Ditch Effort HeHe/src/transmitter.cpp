@@ -1,64 +1,32 @@
-#include "functions.h"
-#include <stdio.h>
+#include <Arduino.h>
 
-uint8_t swap = 0;
-// interrupt handler for INT0
-ISR(INT0_vect)
-{
-  swap = swap ? 0 : 1;
-}
+#include <SPI.h>
+#include <Adafruit_I2CDevice.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
-//=================================================================
-//        Main Function
-//=================================================================
-int main(void)
-{
-  // Initialize UART
-  uart_init();
 
-  DDRC = 0x03F; // Set LCD Port Direction
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-  timer_init(); // Initialize timer
+#define OLED_RESET    -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3D ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 
-  // interrupt setup
-  GICR |= (1 << INT0);                     // enable INT0;
-  MCUCR &= ~((1 << ISC01) | (1 << ISC00)); // INT0 low level trigger
-  sei();                                   // enable global interrupt
-  DDRD = 0;                                // all PD pins configured as input
-  PORTD = (1 << PD2);                      // enable pull-up on the INT0 pin
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-  // Set lower half of PORTB (PB0-PB3) as input and upper half (PB4-PB7) as output
-  DDRB = 0xF0;
-  PORTB = 0x0F; // Enable pull-up resistors for lower half
-
-  delay_ms(500); // Initiaize LCD
-  dispinit();
-
-  delay_ms(500);
-
-  display("Welcome to", 1);
-  display("Canteen", 2);
-  delay_ms(8000);
-
-  while (1)
-  {
-
-    if (swap)
-    {
-      uart_transmit('!');
-      clearDisplay();
-      display("Order Total     ", 1);
-      char total[16];
-      sprintf(total, "Rs.%d", order_total);
-      display(total, 2);
-      delay_ms(6000);
-    }
-    else
-    {
-      displayMenu();
-      timer_delay_ms(2000);
-    }
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;);
   }
-
-  return 0;
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0,0);
+  display.println("Hello, world!");
+  display.display();
 }
